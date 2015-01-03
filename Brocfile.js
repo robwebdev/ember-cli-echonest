@@ -3,6 +3,20 @@
 var EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
 var app = new EmberAddon();
+var pickFiles = require('broccoli-static-compiler');
+var mergeTrees = require('broccoli-merge-trees');
+
+var sinon = pickFiles('bower_components/sinon', {
+  srcDir: '/',
+  files: ['index.js'],
+  destDir: '/assets/sinon'
+});
+
+var rosie = pickFiles('bower_components/rosie', {
+  srcDir: '/src',
+  files: ['rosie.js'],
+  destDir: '/assets/rosie'
+});
 
 // Use `app.import` to add additional libraries to the generated
 // output files.
@@ -17,4 +31,4 @@ var app = new EmberAddon();
 // please specify an object with the list of modules as keys
 // along with the exports of each module as its value.
 
-module.exports = app.toTree();
+module.exports = mergeTrees([app.toTree(), sinon, rosie]);

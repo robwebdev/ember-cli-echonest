@@ -1,3 +1,3 @@
 module.exports = {
-  name: 'ember-echonest-adapter'
+  name: 'ember-cli-echonest'
 };
