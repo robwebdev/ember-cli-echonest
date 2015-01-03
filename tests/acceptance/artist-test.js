@@ -26,39 +26,42 @@ module('Acceptance: Artist', {
   }
 });
 
-asyncTest('find artist by id', function() {
+test('when calling store.find for an echonest-artist with an ID', function() {
   server.respondWith(/\/artist\/profile/, success(fixture));
+  stop();
 
   Ember.run(function () {
     store.find('echonest-artist', 'ARH6W4X1187B99274F').then(function (record) {
-      equal(record.get('name'), 'Radiohead', 'record should have name Radiohead');
-      equal(record.get('biographies.length'), 1, 'record should have an array of biographies');
-      ok(record.get('terms.length'), 'record should have an array of terms');
-      ok(record.get('images.length'), 'record should have an array of images');
+      equal(record.get('name'), 'Radiohead', 'the resolved record has the name "Radiohead"');
+      equal(record.get('biographies.length'), 1, 'the resolved record has an array of biographies');
+      ok(record.get('terms.length'), 'the resolved record has an array of terms');
+      ok(record.get('images.length'), 'the resolved record has an array of images');
       start();
     });
   });
 });
 
-asyncTest('find artist by name', function() {
+test('when calling store.find for an echonest-artist with a query containg a name', function() {
   server.respondWith(/\/artist\/search/, success(searchFixture));
+  stop();
 
   Ember.run(function () {
     store.find('echonest-artist', {name: 'Radiohead'}).then(function (records) {
-      equal(records.get('content.0.name'), 'Radiohead', 'first record should have name Radiohead');
+      equal(records.get('content.0.name'), 'Radiohead', 'the first record should have the name Radiohead');
       start();
     });
   });
 });
 
-asyncTest('find similar artists', function() {
+test('when accessing similar artists on an echonest-artist model', function() {
   server.respondWith(/\/artist\/profile/, success(fixture));
   server.respondWith(/\/artist\/similar/, success(similarFixture));
+  stop();
 
   Ember.run(function () {
     store.find('echonest-artist', 'ARH6W4X1187B99274F').then(function (record) {
       record.get('similar').then(function (records) {
-        equal(records.get('content.0.name'), 'Test', 'first record should have name Test');
+        equal(records.get('content.0.name'), 'Test', 'the first record returned should have name Test');
         start();
       });
     });
