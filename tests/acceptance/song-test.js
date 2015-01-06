@@ -37,7 +37,7 @@ test('when calling store.find for an echonest-song with an ID', function() {
   });
 });
 
-test('find playlist of songs based on artist_id', function() {
+test('when finding a playlist of songs based on artist_id', function() {
   server.respondWith(/\/playlist\/basic/, success(buildFixture('songs', 10)));
   stop();
 
@@ -46,7 +46,7 @@ test('find playlist of songs based on artist_id', function() {
       playlist: 'basic',
       artist_id: [1]
     }).then(function (records) {
-      equal(records.get('length'), 10, 'should have 10 records');
+      equal(records.get('length'), 10, 'it resolves with 10 records');
       start();
     });
   });
