@@ -12,6 +12,19 @@ var Model = DS.Model.extend({
 });
 
 var testType = Model.extend();
+var stubGet;
+
+function returnPromise () {
+  return new Ember.RSVP.Promise(function () {});
+}
+
+function stubAjax () {
+  return sandbox.stub(adapter, 'ajax', returnPromise);
+}
+
+function stubGet() {
+  return sandbox.stub(adapter, 'get', returnPromise);
+}
 
 moduleFor('adapter:echonest', 'EchonestAdapter', {
   setup: function () {
@@ -27,9 +40,7 @@ moduleFor('adapter:echonest', 'EchonestAdapter', {
 });
 
 test('when calling adapter.get', function() {
-  var stub = sandbox.stub(adapter, 'ajax', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+  var stub = stubAjax();
   var result = adapter.get(testType, 'testURL', {testProperty: 'testValue'});
   ok(stub.called, 'adapter.ajax is be called');
 
@@ -52,9 +63,7 @@ test('when calling adapter.pathForType with a non prefixed type', function () {
 });
 
 test('when calling adapter.find', function () {
-  var stub = sandbox.stub(adapter, 'get', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+  var stub = stubGet();
   var result = adapter.find(testType, {typeKey: 'echonestArtist'}, 999);
   ok(stub.called, 'adapter.get is called');
 
@@ -65,9 +74,7 @@ test('when calling adapter.find', function () {
 });
 
 test('when calling adapter.findQuery', function () {
-  var stub = sandbox.stub(adapter, 'get', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+  var stub = stubGet();
   var result = adapter.findQuery(testType, {typeKey: 'echonestArtist'}, {name: 'nofx'});
   ok(stub.called, 'adapter.get is called');
 
@@ -78,9 +85,7 @@ test('when calling adapter.findQuery', function () {
 });
 
 test('when calling adapter.findHasMany', function () {
-  var stub = sandbox.stub(adapter, 'get', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+  var stub = stubGet();
   var result = adapter.findHasMany({}, Ember.Object.create({id: 999}), 'artist/similar');
   ok(stub.called, 'adapter.get is called');
 

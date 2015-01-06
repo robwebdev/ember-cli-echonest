@@ -7,6 +7,7 @@ import Ember from 'ember';
 import DS from 'ember-data';
 
 var sandbox;
+var adapter;
 var resolvedPromise = new Ember.RSVP.Promise(function (resolve) {resolve();});
 
 var Model = DS.Model.extend({
@@ -15,11 +16,18 @@ var Model = DS.Model.extend({
 
 var testType = Model.extend();
 
+function stubSuper () {
+  return sandbox.stub(adapter, '_super', function () {
+    return resolvedPromise;
+  });
+}
+
 moduleFor('adapter:echonest-song', 'EchonestSongAdapter', {
   needs: ['adapter:echonest'],
 
   setup: function () {
     sandbox = sinon.sandbox.create();
+    adapter = this.subject();
   },
 
   teardown: function () {
@@ -28,10 +36,7 @@ moduleFor('adapter:echonest-song', 'EchonestSongAdapter', {
 });
 
 test('when calling adpater.findQuery with a traditional query', function() {
-  var adapter = this.subject();
-  var stub = sandbox.stub(adapter, '_super', function () {
-    return resolvedPromise;
-  });
+  var stub = stubSuper();
   var store = {};
   var query = {
     artist_name: 'Radiohead'
@@ -46,7 +51,6 @@ test('when calling adpater.findQuery with a traditional query', function() {
 });
 
 test('when calling adpater.findQuery with playlist = "basic"', function() {
-  var adapter = this.subject();
   var stub = sandbox.stub(adapter, '_super', function () {
     return resolvedPromise;
   });
@@ -65,12 +69,10 @@ test('when calling adpater.findQuery with playlist = "basic"', function() {
 });
 
 test('when calling adapter.bucketForPlaylist', function () {
-  var adapter = this.subject();
   equal(adapter.bucketForPlaylist('basic').length, 0, 'it returns an empty array' );
 });
 
 test('when calling adapter.getPlaylist', function() {
-  var adapter = this.subject();
   var store = {};
   var query = {
     playlist: 'basic',
