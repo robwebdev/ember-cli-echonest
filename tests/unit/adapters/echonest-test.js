@@ -12,6 +12,19 @@ var Model = DS.Model.extend({
 });
 
 var testType = Model.extend();
+var stubGet;
+
+function returnPromise () {
+  return new Ember.RSVP.Promise(function () {});
+}
+
+function stubAjax () {
+  return sandbox.stub(adapter, 'ajax', returnPromise);
+}
+
+function stubGet() {
+  return sandbox.stub(adapter, 'get', returnPromise);
+}
 
 moduleFor('adapter:echonest', 'EchonestAdapter', {
   setup: function () {
@@ -26,88 +39,86 @@ moduleFor('adapter:echonest', 'EchonestAdapter', {
   }
 });
 
-test('get', function() {
-  var stub = sandbox.stub(adapter, 'ajax', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+test('when calling adapter.get', function() {
+  var stub = stubAjax();
   var result = adapter.get(testType, 'testURL', {testProperty: 'testValue'});
-  ok(adapter.get, 'should have a method get');
-  ok(stub.called, 'adapter.ajax should be called');
+  ok(stub.called, 'adapter.ajax is be called');
 
   var arg = stub.getCall(0).args[0];
-  equal(arg.url, 'testURL', 'should call adpater.ajax with correct URL');
-  equal(arg.data.testProperty, 'testValue', 'should call adpater.ajax with correct data');
-  equal(arg.data.api_key, 'testAPIKey', 'should call adpater.ajax with correct api key');
-  equal(arg.data.format, 'json', 'should call adpater.ajax with data.format as jsonp');
-  equal(arg.data.bucket[0], 'testBucket1', 'should call adpater.ajax with correct buckets');
-  equal(arg.data.bucket[1], 'testBucket2', 'should call adpater.ajax with correct buckets');
-  ok(result instanceof Ember.RSVP.Promise, 'should return a promise');
+  equal(arg.url, 'testURL', 'adpater.ajax is called with the correct URL');
+  equal(arg.data.testProperty, 'testValue', 'adpater.ajax is called with the correct data');
+  equal(arg.data.api_key, 'testAPIKey', 'adpater.ajax is called with the correct api key');
+  equal(arg.data.format, 'json', 'adpater.ajax is called with data.format as json');
+  equal(arg.data.bucket[0], 'testBucket1', 'adpater.ajax is called with correct buckets');
+  equal(arg.data.bucket[1], 'testBucket2', 'adpater.ajax is called with correct buckets');
+  ok(result instanceof Ember.RSVP.Promise, 'a promise is returned');
 });
 
-test('pathForType', function () {
-  equal(adapter.pathForType('echonestArtist'), 'artist', 'should return the type without echonest prefix');
-  equal(adapter.pathForType('playlist'), 'playlist', 'should return the type untouched if no echonest prefix');
+test('when calling adapter.pathForType with a prefixed type', function () {
+  equal(adapter.pathForType('echonestArtist'), 'artist', 'the type is returned without echonest prefix');
 });
 
-test('find', function () {
-  var stub = sandbox.stub(adapter, 'get', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+test('when calling adapter.pathForType with a non prefixed type', function () {
+  equal(adapter.pathForType('playlist'), 'playlist', 'the type is returned untouched');
+});
+
+test('when calling adapter.find', function () {
+  var stub = stubGet();
   var result = adapter.find(testType, {typeKey: 'echonestArtist'}, 999);
-  ok(stub.called, 'should have called the "get" method');
+  ok(stub.called, 'adapter.get is called');
 
   var args = stub.getCall(0).args;
-  equal(args[1], 'http://developer.echonest.com/api/v4/artist/profile', 'should call "get" with a url');
-  equal(args[2].id, 999, 'should pass the required record id in the data object');
-  ok(result instanceof Ember.RSVP.Promise, 'should return a promise');
+  equal(args[1], 'http://developer.echonest.com/api/v4/artist/profile', 'adapter.get is called with the correct URL');
+  equal(args[2].id, 999, 'adapter.get is called with a query object containing the correct id');
+  ok(result instanceof Ember.RSVP.Promise, 'a promise is returned');
 });
 
-test('findQuery', function () {
-  var stub = sandbox.stub(adapter, 'get', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+test('when calling adapter.findQuery', function () {
+  var stub = stubGet();
   var result = adapter.findQuery(testType, {typeKey: 'echonestArtist'}, {name: 'nofx'});
-  ok(stub.called, 'should have called the "get" method');
+  ok(stub.called, 'adapter.get is called');
 
   var args = stub.getCall(0).args;
-  equal(args[1], 'http://developer.echonest.com/api/v4/artist/search', 'should call "get" with a url with "/search" appended');
-  equal(args[2].name, 'nofx', 'should have query present in data object');
-  ok(result instanceof Ember.RSVP.Promise, 'should return a promise');
+  equal(args[1], 'http://developer.echonest.com/api/v4/artist/search', 'adapter.get is called with the correct URL');
+  equal(args[2].name, 'nofx', 'adapter.get is called with a query object containing the correct name');
+  ok(result instanceof Ember.RSVP.Promise, 'a promise is returned');
 });
 
-test('findHasMany', function () {
-  var stub = sandbox.stub(adapter, 'get', function () {
-    return new Ember.RSVP.Promise(function () {});
-  });
+test('when calling adapter.findHasMany', function () {
+  var stub = stubGet();
   var result = adapter.findHasMany({}, Ember.Object.create({id: 999}), 'artist/similar');
-  ok(stub.called, 'should have called the "get" method');
+  ok(stub.called, 'adapter.get is called');
 
   var args = stub.getCall(0).args;
-  equal(args[1], 'http://developer.echonest.com/api/v4/artist/similar', 'should call "get" with a url with "/search" appended');
-  equal(args[2].id, 999, 'should have id present in query');
-  ok(result instanceof Ember.RSVP.Promise, 'should return a promise');
+  equal(args[1], 'http://developer.echonest.com/api/v4/artist/similar', 'adapter.get is called with the correct URL');
+  equal(args[2].id, 999, 'adapter.get is called with a query object containing the correct id');
+  ok(result instanceof Ember.RSVP.Promise, 'a promise is returned');
 });
 
-test('unsupported methods', function () {
+test('when calling adapter.createRecord', function () {
   throws(function () {
     adapter.createRecord({}, {typeKey: 'echonestArtist'});
   }, function( err ) {
     return err.toString() === 'You cannot create an echonestArtist';
-  },'should throw an error when createRecord is called');
+  },'an error is thrown');
+});
 
+test('when calling adapter.deleteRecord', function () {
   throws(function () {
     adapter.deleteRecord({}, {typeKey: 'echonestArtist'}, Ember.Object.create({id: 999}));
   }, function( err ) {
     return err.toString() === 'You cannot delete an echonestArtist';
-  },'should throw an error when deleteRecord is called');
+  },'an error is thrown');
+});
 
+test('when calling adapter.updateRecord', function () {
   throws(function () {
     adapter.updateRecord({}, {typeKey: 'echonestArtist'}, Ember.Object.create({id: 999}));
   }, function( err ) {
     return err.toString() === 'You cannot update an echonestArtist';
-  },'should throw an error when updateRecord is called');
+  },'an error is thrown');
 });
 
-test('defaultSerializer', function () {
-  equal(adapter.defaultSerializer, 'echonest', 'defaultSerializer should be set to echonest');
+test('the property defaultSerializer', function () {
+  equal(adapter.defaultSerializer, 'echonest', 'is should be set to "echonest"');
 });
